@@ -11,13 +11,13 @@
 ##################################################################################################
 ##					DESCRIPTION						##
 ##################################################################################################
-#Ce script a pour but la sauvegarde incrementale de tout les fichiers néccessaires à             #
-#une restauration de données d'un site WordPress  en cas de disfonctionnement du disque	dur	 #
+#Ce script a pour but la sauvegarde incrementale de tout les fichiers nÃ©ccessaires Ã              #
+#une restauration de donnÃ©es d'un site WordPress  en cas de disfonctionnement du disque	dur	 #
 #Les actions du script sont les suivantes:						         #
-#-Création d'un dossier compréssé des fichiers spécifié						 #
-#-Transfert du dossier compréssé vers le sereur de sauvegarde  					 #
-#-RÃ©seau sur lequel se trouve  les postes de travail.						 #
-#-PossibilitÃ© de supprimer l'utilisateur admin.  						 #
+#-CrÃ©ation d'un dossier comprÃ©ssÃ© des fichiers spÃ©cifiÃ©						 #
+#-Transfert du dossier comprÃ©ssÃ© vers le sereur de sauvegarde  					 #
+#-RÃƒÂ©seau sur lequel se trouve  les postes de travail.						 #
+#-PossibilitÃƒÂ© de supprimer l'utilisateur admin.  						 #
 ##################################################################################################
 
 # PARAMETRES A EDITER
@@ -26,10 +26,10 @@ SERVER="192.168.10.14"               #Serveur backup FTP
  USER="admin"                   #Votre nom d'utilisateur
  PASS="0000"                    #Votre password
 
- #### Informations Base de donnée ####
+ #### Informations Base de donnÃ©e ####
 SITE_PATH="/var/www/html" #Could also be subsites/subsitename
 
-##Vérification de l'accès au serveur de sauvegarde
+##VÃ©rification de l'accÃ¨s au serveur de sauvegarde
 
 #ftp -i -n $SERVER << END_SCRIPT
 #quote USER $USER
@@ -40,20 +40,20 @@ SITE_PATH="/var/www/html" #Could also be subsites/subsitename
 
 
 
-##Vérification de la dernière sauvegarde présente
+##VÃ©rification de la derniÃ¨re sauvegarde prÃ©sente
 hier=$(date -d "1 day ago" '+%d-%m-%Y')
 jour=$(date +"%d-%m-%Y")
 last_backup_WP=backup_WP.$hier 
 backup_WP=backup_WP.$jour
 
-#Déclaratation variables couleur texte commandes echo
+#DÃ©claratation variables couleur texte commandes echo
 neutre='\e[0;m' 
 rouge='\e[0;31m' 
 vert='\e[0;32m' 
 
 echo "#################################RESTAURATION DE SAUVEGARDE###################################"
 
-echo     Quelle est la sauvegarde � restaurer?
+echo     Quelle est la sauvegarde à restaurer?
 echo -e  "${neutre}Sauvegarde du jour     ${vert}Tapez 1${neutre}"
 echo -e  "${neutre}Sauvegarde de la veille  ${vert}Tapez 2${neutre}"
 
@@ -71,8 +71,8 @@ echo $backup_WP
 
  fi
 
-##Transfert de la dernière sauvegarde
-echo -e  "${vert}R�cup�ration de la sauvegarde du jour ${neutre}"
+##Transfert de la derniÃ¨re sauvegarde
+echo -e  "${vert}Récupération de la sauvegarde du jour ${neutre}"
 ftp -i -n $SERVER << END_SCRIPT
 quote USER $USER
 quote PASS $PASS
@@ -85,13 +85,13 @@ quit
 END_SCRIPT
 
 
-##Déplacement des données vers le fichier racine du site web apr�s suppression ancien fichier 
+##DÃ©placement des donnÃ©es vers le fichier racine du site web après suppression ancien fichier 
 
-##Décompression de la sauvegarde:
+##DÃ©compression de la sauvegarde:
 rm -r /var/www/html/* #Suppression de la racine du site Web vierge
-cd /var/www/html && tar -xvf /root/html.$date_backup.tar.gz 2>>/var/log/restauration_error.log  #D�compression de la sauvegarde dans le dossier racine 
+cd /var/www/html && tar -xvf /root/html.$date_backup.tar.gz 2>>/var/log/restauration_error.log  #Décompression de la sauvegarde dans le dossier racine 
 
 
-##Restauration de la base de donnée
+##Restauration de la base de donnÃ©e
 mysql -u dbadminwp -pOcp6@wordpress -D db_wp < /root/db_wp.$date_backup.sql 2>>/var/log/restauration_error.log
 

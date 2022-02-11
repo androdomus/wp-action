@@ -1,0 +1,97 @@
+#!/bin/bash
+##################################################################################################
+##											 	##
+##												##
+##					SCRIPT RESTAURATION					##
+##												##
+##												##
+##################################################################################################
+##Auteur: Laurent NERO						       				##
+##Version: 1											##
+##################################################################################################
+##					DESCRIPTION						##
+##################################################################################################
+#Ce script a pour but la sauvegarde incrementale de tout les fichiers néccessaires à             #
+#une restauration de données d'un site WordPress  en cas de disfonctionnement du disque	dur	 #
+#Les actions du script sont les suivantes:						         #
+#-Création d'un dossier compréssé des fichiers spécifié						 #
+#-Transfert du dossier compréssé vers le sereur de sauvegarde  					 #
+#-RÃ©seau sur lequel se trouve  les postes de travail.						 #
+#-PossibilitÃ© de supprimer l'utilisateur admin.  						 #
+##################################################################################################
+
+# PARAMETRES A EDITER
+#######################
+SERVER="192.168.10.14"               #Serveur backup FTP
+ USER="admin"                   #Votre nom d'utilisateur
+ PASS="0000"                    #Votre password
+
+ #### Informations Base de donnée ####
+SITE_PATH="/var/www/html" #Could also be subsites/subsitename
+
+##Vérification de l'accès au serveur de sauvegarde
+
+#ftp -i -n $SERVER << END_SCRIPT
+#quote USER $USER
+#quote PASS $PASS
+#END_SCRIPT
+
+###Restauration adresse IP ancien serveur
+
+
+
+##Vérification de la dernière sauvegarde présente
+hier=$(date -d "1 day ago" '+%d-%m-%Y')
+jour=$(date +"%d-%m-%Y")
+last_backup_WP=backup_WP.$hier 
+backup_WP=backup_WP.$jour
+
+#Déclaratation variables couleur texte commandes echo
+neutre='\e[0;m' 
+rouge='\e[0;31m' 
+vert='\e[0;32m' 
+
+echo "#################################RESTAURATION DE SAUVEGARDE###################################"
+
+echo     Quelle est la sauvegarde � restaurer?
+echo -e  "${neutre}Sauvegarde du jour     ${vert}Tapez 1${neutre}"
+echo -e  "${neutre}Sauvegarde de la veille  ${vert}Tapez 2${neutre}"
+
+ read choix
+ if [ $choix = "1" ]; then
+ jour=$(date +"%d-%m-%Y")
+ backup_WP=backup_WP.$jour
+ date_backup=$jour
+
+echo $backup_WP
+ elif [ $choix = "2" ]; then
+ hier=$(date -d "1 day ago" '+%d-%m-%Y')
+ backup_WP=backup_WP.$hier
+ date_backup=$hier
+
+ fi
+
+##Transfert de la dernière sauvegarde
+echo -e  "${vert}R�cup�ration de la sauvegarde du jour ${neutre}"
+ftp -i -n $SERVER << END_SCRIPT
+quote USER $USER
+quote PASS $PASS
+pwd
+bin
+cd $backup_WP
+mget *
+prompt
+quit
+END_SCRIPT
+
+
+##Déplacement des données vers le fichier racine du site web apr�s suppression ancien fichier 
+
+##Décompression de la sauvegarde:
+rm -r /var/www/html/* #Suppression de la racine du site Web vierge
+cd /var/www/html && tar -xvf /root/html.$date_backup.tar.gz 2>>/var/log/restauration_error.log  #D�compression de la sauvegarde dans le dossier racine 
+
+
+##Restauration de la base de donnée
+mysql -u dbadminwp -pOcp6@wordpress -D db_wp < /root/db_wp.$date_backup.sql 2>>/var/log/restauration_error.log
+

@@ -1,30 +1,30 @@
 #!/bin/bash
 ##################################################################################################
-##											 	                                                ##
-##												                                                ##
-##					backup_WP_data					                                    ##
-##												                                                ##
-##												                                                ##
+##											        ##
+##												##
+##					backup_WP_data					        ##
+##												##
+##												##
 ##################################################################################################
-##Auteur: Laurent NERO						       				                                ##
-##Version: 1											                                        ##
+##Auteur: Laurent NERO						       				##
+##Version: 1											##
 ##################################################################################################
-##					DESCRIPTION						                                            ##
+##					DESCRIPTION						##
 ##################################################################################################
-#Ce script a pour but la sauvegarde incrementale de tout les fichiers nÃ©ccessaires Ã              #
-#une restauration de donnÃ©es d'un site WordPress en cas de disfonctionnement du disque dur	     #
-#Les actions du script sont les suivantes:						                                 #
-#-CrÃ©ation d'un dossier comprÃ©ssÃ© des fichiers spÃ©cifiÃ©						                     #
-#-Transfert du dossier comprÃ©ssÃ© vers le serveur de sauvegarde  					             #
-#						                                                                         #
-# 						                                                                         #
+#Ce script a pour but la sauvegarde incrementale de tout les fichiers néccessaires à             #
+#une restauration de données d'un site WordPress en cas de disfonctionnement du disque dur	 #
+#Les actions du script sont les suivantes:						         #
+#-Création d'un dossier compréssé des fichiers spécifié					         #
+#-Transfert du dossier compréssé vers le serveur de sauvegarde  				 #
+#-Vérification de la rétention des sauvegardes et rotation des sauvegardes 			 #			                                                 #
+# 						                                                 #
 ##################################################################################################
 
 # Informations FTP  
 #######################
-SERVER="192.168.10.14"               #Serveur backup FTP
-USER="admin"                   #Votre nom d'utilisateur
-PASS="Ocp9@ftp"                    #Votre password
+SERVER="192.168.10.14"               # Adresse IP Serveur backup FTP
+USER="admin"                   # login utilisateur
+PASS="Mot_de_passe"                    #Mot de passe
 
 #### Informations Base de donnÃ©e ####
 SITE_PATH="/var/www/html" #Could also be subsites/subsitename
@@ -56,9 +56,7 @@ echo -e "\n\n\n\n---------------------------------------------------------------
 echo -e "Heure de demarrage de la sauvegarde : $(date +%H:%M)\n--------------------------------------------------------------------------------" | tee -a $log/sauvegarde_$jour.log
 
 
-
-
-echo "Sauvegarde des donnÃ©es Ã  la racine du site Web." | tee -a $log/sauvegarde_$jour.log
+echo "Sauvegarde des données à la racine du site Web." | tee -a $log/sauvegarde_$jour.log
 cd /var/www/html
 tar czf $SITE_PATH.$jour.tar.gz * 2>> $log/sauvegarde_$jour.log	
 mv $SITE_PATH.$jour.tar.gz $BACKUP_FOLDER/$backup_WP 2>> $log/sauvegarde_$jour.log
@@ -66,7 +64,7 @@ mv $SITE_PATH.$jour.tar.gz $BACKUP_FOLDER/$backup_WP 2>> $log/sauvegarde_$jour.l
 
 #### Database Backup ####
 
-echo -e "Sauvegarde de la base de donnÃ©e" | tee -a $log/sauvegarde_$jour.log
+echo -e "Sauvegarde de la base de données" | tee -a $log/sauvegarde_$jour.log
 
 mysqldump -h $DB_HOST -u$DB_USER -p$DB_PASS $DB_NAME > $DB_NAME.$jour.sql 2>> $log/sauvegarde_$jour.log
 mv $database_backup $BACKUP_FOLDER/$backup_WP 2>> $log/sauvegarde_$jour.log
@@ -81,8 +79,6 @@ cd $BACKUP_FOLDER/$backup_WP 2>> $log/sauvegarde_$jour.log
 
 
 echo -e "Heure de fin de la sauvegarde : $(date +%H:%M:%S)\n----------------------------------------------------" | tee -a $log/sauvegarde_$jour.log
-
-
 
 
 ### Transfert FTP ###
@@ -106,9 +102,6 @@ END_SCRIPT
 
 echo -e "Le transfert de la sauvegarde $backup_WP a Ã©tÃ© effectuÃ© avec succÃ¨s."
 
-###Sauvegarde incrÃ©mentale
-#rsync -az --stats --delete-after $BACKUP_FOLDER $ssh_distant >> $log/sauvegarde_$jour.log 2>>/var/log/sauvegarde_error.log
-#nice -n 19 rdiff-backup $SITE_PATH $ssh_distant && nice -n 19 rdiff-backup --remove-older-than 1W --force $ssh_distant
 
 ###Rotation des sauvegardes
 month=$(date '+%m')

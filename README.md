@@ -64,13 +64,8 @@ Le troisième script permet la restauration des données et de la base de donné
 $ sudo ./restore_WP
 ```
 
-### Cas d'utilisation
+### Logs et Gestion des erreurs
 
- 
-
-
-
-
-### Gestion des erreurs
+A chaque sauvegarde est généré un fichier de log avec le nom sauvegarde_date.log. Ce fichier permet de vérifier si la sauvegarde s'est bien déroulé ou si un problème est survenu.
 
 
